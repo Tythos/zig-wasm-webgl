@@ -149,7 +149,7 @@ pub extern "Webgl" fn getUniformLocation(u32, *const u8, u32) i32; // Returns th
 // uniform[1234][fi][v]()	(WebGLUniformLocation, value*)		Specifies a value for a uniform variable.
 pub extern "Webgl" fn uniform4fv(i32, f32, f32, f32, f32) void; // Specifies a value for a `4fv` uniform variable.
 // uniformMatrix[234]fv()	(WebGLUniformLocation, Glboolean, Float32Array)		Specifies a matrix value for a uniform variable.
-pub extern "Webgl" fn uniformMatrix4fv(i32, bool, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32, f32) void; // Specifies values for a 4fv uniform matrix
+pub extern "Webgl" fn uniformMatrix4fv(i32, bool, *const f32, u32) void; // Specifies values for a 4x4 uniform matrix
 // vertexAttrib[1234]f[v]()	(Gluint, Number*, Float32Array)		Specifies a value for a generic vertex attribute.
 pub extern "Webgl" fn vertexAttribPointer(u32, u32, u32, u32, u32, u32) void; // Specifies the data formats and locations of vertex attributes in a vertex attributes array.
 

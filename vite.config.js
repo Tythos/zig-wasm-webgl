@@ -25,36 +25,52 @@ function zigWasmPlugin() {
         name: "zig-wasm-rebuild",
 
         config(config, env) {
+            // Initial build if WASM doesn't exist
             if (!fs.existsSync(wasmOutputPath)) {
                 const buildProcess = spawn("zig", build_args, {
                     cwd: rootRuntimeDir,
-                    stdio: "inherit",
-                    sync: true
+                    stdio: "inherit"
+                });
+                
+                return new Promise((resolve, reject) => {
+                    buildProcess.on("close", (code) => {
+                        if (code === 0) {
+                            resolve();
+                        } else {
+                            reject(new Error(`Zig build failed with code ${code}`));
+                        }
+                    });
                 });
             }
         },
 
         configureServer(server) {
-            // Check if the changed file is in the Zig source directory
+            // Watch both source and output directories
             server.watcher.add(zigSourceDir);
+            server.watcher.add(path.dirname(wasmOutputPath));
         },
 
         handleHotUpdate({file, server}) {
-            // on change, rebuild the WASM module and reload the appliccation
-    
             if (file.endsWith(".zig")) {
+                console.log("Rebuilding Zig/WASM module...");
+                
                 const buildProcess = spawn("zig", build_args, {
                     cwd: rootRuntimeDir,
                     stdio: "inherit"
                 });
 
-                // trigger a full page reload if the build succeeds
-                buildProcess.on("close", (code) => {
-                    if (code === 0) {
-                        server.ws.send({
-                            type: "full-reload"
-                        });
-                    }
+                return new Promise((resolve) => {
+                    buildProcess.on("close", (code) => {
+                        if (code === 0) {
+                            console.log("Zig/WASM build successful, reloading...");
+                            server.ws.send({
+                                type: "full-reload"
+                            });
+                        } else {
+                            console.error(`Zig/WASM build failed with code ${code}`);
+                        }
+                        resolve();
+                    });
                 });
             }
         }
